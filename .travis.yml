@@ -1,0 +1,20 @@
+sudo: required
+service:
+    - docker
+
+before_install:
+    - docker build -t zwassim1/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+    - docker run -e CI=true zwassim1/react-test yarn test
+
+after_success:
+    - docker build -t zwassim1/fibonacci-client ./client
+    - docker build -t zwassim1/fibonacci-nginx ./nginx
+    - docker build -t zwassim1/fibonacci-server ./server
+    - docker build -t zwassim1/fibonacci-worker ./worker
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    - docker push zwassim1/fibonacci-client
+    - docker push zwassim1/fibonacci-nginx
+    - docker push zwassim1/fibonacci-server
+    - docker push zwassim1/fibonacci-worker
